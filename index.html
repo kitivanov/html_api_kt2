@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>КТ №2. WebStorage с использованием HTML-таблицы</title>
+  <style>
+    table { border-collapse: collapse; width: 50%; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+    th { background-color: #f3f3f3; }
+    span.delete-btn {
+      color: red;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>КТ №2. WebStorage с использованием HTML-таблицы</h2>
+
+  <label>
+    Хранилище:
+    <select id="storageSelect" onchange="getStorage()">
+      <option value="local">LocalStorage</option>
+      <option value="session">SessionStorage</option>
+    </select>
+  </label>
+  <br><br>
+
+  <label>Ключ: <input type="text" id="keyInput"></label>
+  <label>Значение: <input type="text" id="valueInput"></label>
+  <button onclick="saveItem()">Сохранить</button>
+  <button onclick="clearStorage()">Очистить всё</button>
+
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>Ключ</th>
+        <th>Значение</th>
+        <th>Удалить</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    let currentStorage = localStorage;
+
+    const emptyHeader = { key: '—', value: 'Нет данных', del: '' };
+
+    // задание 1
+    function updateTable() {
+      const tbody = document.querySelector("#dataTable tbody");
+      tbody.innerHTML = "";
+
+      if (currentStorage.length === 0) {
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${emptyHeader.key}</td>
+          <td>${emptyHeader.value}</td>
+          <td>${emptyHeader.del}</td>
+        `;
+        tbody.appendChild(row);
+
+      } else {
+
+        for (let i = 0; i < currentStorage.length; i++) {
+          const key = currentStorage.key(i);
+          const value = currentStorage.getItem(key);
+
+          const row = document.createElement("tr");
+          const delCell = document.createElement("td");
+          const delSpan = document.createElement("span");
+
+          delSpan.textContent = "X";
+          delSpan.className = "delete-btn";
+          delSpan.onclick = () => deleteItem(key);
+
+          row.innerHTML = `<td>${key}</td><td>${value}</td>`;
+          delCell.appendChild(delSpan);
+          row.appendChild(delCell);
+          tbody.appendChild(row);
+    
+        }
+      }
+    }
+
+    // задание 2
+    function getStorage() {
+      const selected = document.getElementById("storageSelect").value;
+      currentStorage = selected === "local" ? localStorage : sessionStorage;
+      updateTable();
+    }
+
+    // задание 3
+    function saveItem() {
+      const key = document.getElementById("keyInput").value.trim();
+      const value = document.getElementById("valueInput").value.trim();
+
+      if (!key) {
+        alert("Введите ключ!");
+        return;
+      }
+
+      currentStorage.setItem(key, value);
+      updateTable();
+    }
+
+    // задание 4
+    function clearStorage() {
+      if (confirm("Вы уверены, что хотите полностью очистить хранилище?")) {
+        currentStorage.clear();
+        updateTable();
+      }
+    }
+
+    function deleteItem(key) {
+      currentStorage.removeItem(key);
+      updateTable();
+    }
+
+    window.onload = updateTable;
+  </script>
+</body>
+</html>
